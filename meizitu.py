@@ -123,7 +123,7 @@ def home_page_seek(url):
         # print soup(class_="wp-item")
 
 
-# 相册页面html分析
+# 相册页面html分析，获取图片url
 def set_page_seek(set_name, url):
     p_request = urllib.urlopen(url)
     p_html = p_request.read()
