@@ -1,12 +1,7 @@
-# coding: utf-8
+ï»¿# coding: utf-8
 """
-# ÏÂÔØÄ£¿é
-python_version = Python 2.7.11  [MSC v.1500 32 bit (Intel)] on win32
-author = liu kun
-start_time = 2016-08
-email = lancelotdev@163.com
+    ç½‘é¡µä¸‹å¯èƒ½è®©ä½ æ„Ÿå…´è¶£çš„å›¾ç‰‡
 """
-
 import re
 import os
 import sys
@@ -16,10 +11,9 @@ import urllib
 import urllib2
 import logging
 from time import ctime,sleep
-import huaban
-import zhihu
 
-# Ä£Äâä¯ÀÀÆ÷·ÃÎÊ²ÎÊı
+python_version = 2.7
+# æ¨¡æ‹Ÿæµè§ˆå™¨è®¿é—®å‚æ•°
 user_agent = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
 headers = {
     'Connection': 'Keep-Alive',
@@ -27,11 +21,11 @@ headers = {
     'Accept-Language': 'en-US,en;q=0.8,zh-Hans-CN;q=0.5,zh-Hans;q=0.3',
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64; Trident/7.0; rv:11.0) like Gecko'
 }
-# log settings ×¥È¡¼ÇÂ¼ÈÕÖ¾µÄÉèÖÃ
+# log settings æŠ“å–è®°å½•æ—¥å¿—çš„è®¾ç½®
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S',
-                    filename='pythonDownload.log',
+                    filename='pythonDown.log',
                     filemode='w')
 
 
@@ -49,7 +43,7 @@ def agent_request(url):
     return html_content      
     
     
-# ¶àÏß³ÌÏÂÔØÆ÷,  Õë¶ÔÍ¼Æ¬urlÒÔ.jpg½áÎ²
+# å¤šçº¿ç¨‹ä¸‹è½½å™¨,  é’ˆå¯¹å›¾ç‰‡urlä»¥.jpgç»“å°¾
 class DownLoad(threading.Thread):
     """
     :ivar que: the urls of the files
@@ -93,33 +87,24 @@ class DownLoad(threading.Thread):
             else:
                 break
 
+# è·å–ç›®æ ‡ url åˆ—è¡¨                
+def get_pic_url(html_content):
+    pat_string = r"img.*?src=\"(.*?)\""
+    img_pattern =  re.compile(pat_string, re.S)
+    img_urls = re.findall(img_pattern, html_content)
+    urls = [i for i in img_urls if isinstance(i, str) and i.startswith("http") and ".js" not in i]
+    print(urls)
+    return urls
 
-# ÈÎÎñµ÷¶È£¬¹ÜÀíÏÂÔØÆ÷
-class DownLoadDeployer:
-    def __init__(self, pic_url_list):
-        self.pic_list = pic_url_list
+def exe(page_url):
+    html_content = agent_request(page_url)
+    url_list = get_pic_url(html_content)
+    d = DownLoad(url_list)
+    d.run()
 
-    def start_download(self):
-        try:
-            que = Queue.Queue()
-            # que=queue.Queue()#py 3
-            for img in self.pic_list:
-                que.put(img)
-            for i in range(5):
-                d = DownLoad(que)
-                d.start()
-                # ·ÃÎÊ²»ÒªÌ«¿ì
-                sleep(1)
-        except Exception as e:
-            print ("pic_downloader exception:" + str(e))
-            
-def download_zhihu_img(question_url):
-    d = DownLoadDeployer(zhihu.url_list(question_url))
-    d.start_download()
-    
 if __name__ == "__main__":
-    # id = 2698020 # 1543653
-    # d = DownLoadDeployer(huaban.get_huaban_img_by_board_id(id))
-    # d.start_download()
-    question_url = "https://www.zhihu.com/question/36798482"
-    download_zhihu_img(question_url)
+    if len(sys.argv) == 2:
+        exe(str(sys.argv[1]))
+    else:
+        exe(raw_input())
+    
